@@ -58,7 +58,33 @@ gunicorn -w 1 --threads 8 -b 0.0.0.0:8000 app:app   # producción
 
 Meta necesita una URL pública con HTTPS. Para probar en tu ordenador puedes usar
 [ngrok](https://ngrok.com/): `ngrok http 8000`. Para tenerlo siempre encendido, despliégalo
-en Render, Railway, Fly.io o un VPS.
+en Render (siguiente sección), Railway, Fly.io o un VPS.
+
+### Desplegar en Render
+
+El repositorio incluye `render.yaml`, así que Render lo configura casi todo solo.
+
+1. Entra en <https://dashboard.render.com> (puedes registrarte con tu cuenta de GitHub).
+2. **New** → **Blueprint** → conecta GitHub y elige el repositorio `bot-gemini2`.
+3. Render te pedirá los valores secretos. Pega los de la tabla de arriba:
+   `ANTHROPIC_API_KEY`, `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID` y `WHATSAPP_APP_SECRET`.
+   `WHATSAPP_VERIFY_TOKEN` se genera solo.
+4. Pulsa **Apply**. Cuando termine, tendrás una URL como
+   `https://whatsapp-claude-bot.onrender.com`. Si la abres debe decir
+   "Bot de WhatsApp con Claude funcionando".
+5. En Render → tu servicio → **Environment**, copia el valor de `WHATSAPP_VERIFY_TOKEN`:
+   lo necesitas en el paso 4 de abajo, con la URL `https://whatsapp-claude-bot.onrender.com/webhook`.
+
+Notas:
+
+- El blueprint usa el plan **Starter** (unos 7 $/mes). El plan **Free** también funciona
+  (cambia `plan: starter` por `plan: free`), pero el servidor se duerme tras 15 minutos sin
+  mensajes: el primer mensaje tarda casi un minuto en contestarse y se pierde el historial.
+- El token temporal de Meta caduca a las 24 horas. Para producción crea un token permanente:
+  Meta Business Suite → Configuración del negocio → **Usuarios del sistema** → genera un token
+  con los permisos `whatsapp_business_messaging` y `whatsapp_business_management`, y
+  cámbialo en Render → **Environment**.
+- Cada vez que fusiones cambios en `main`, Render vuelve a desplegar el bot automáticamente.
 
 ## 4. Conectar el webhook en Meta
 
